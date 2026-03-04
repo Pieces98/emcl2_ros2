@@ -200,7 +200,7 @@ void EMcl2Node::cbScan(const sensor_msgs::msg::LaserScan::ConstSharedPtr msg)
 void EMcl2Node::initialPoseReceived(
   const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr msg)
 {
-	RCLCPP_INFO(get_logger(), "Run receiveInitialPose");
+	RCLCPP_DEBUG(get_logger(), "Run receiveInitialPose");
 	if (!initialpose_receive_) {
 		if (scan_receive_ && map_receive_) {
 			init_x_ = msg->pose.pose.position.x;
@@ -241,7 +241,7 @@ void EMcl2Node::loop(void)
 	if (init_pf_) {
 		double x, y, t;
 		if (!getOdomPose(x, y, t)) {
-			RCLCPP_INFO(get_logger(), "can't get odometry info");
+			RCLCPP_DEBUG(get_logger(), "can't get odometry info");
 			return;
 		}
 		pf_->motionUpdate(x, y, t);
@@ -249,7 +249,7 @@ void EMcl2Node::loop(void)
 		double lx, ly, lt;
 		bool inv;
 		if (!getLidarPose(lx, ly, lt, inv)) {
-			RCLCPP_INFO(get_logger(), "can't get lidar pose info");
+			RCLCPP_DEBUG(get_logger(), "can't get lidar pose info");
 			return;
 		}
 
@@ -267,13 +267,13 @@ void EMcl2Node::loop(void)
 		alpha_pub_->publish(alpha_msg);
 	} else {
 		if (!scan_receive_) {
-			RCLCPP_WARN(
-			  get_logger(),
+			RCLCPP_WARN_THROTTLE(
+			  get_logger(), ros_clock_, 5000,
 			  "Not yet received scan. Therefore, MCL cannot be initiated.");
 		}
 		if (!map_receive_) {
-			RCLCPP_WARN(
-			  get_logger(),
+			RCLCPP_WARN_THROTTLE(
+			  get_logger(), ros_clock_, 5000,
 			  "Not yet received map. Therefore, MCL cannot be initiated.");
 		}
 	}
